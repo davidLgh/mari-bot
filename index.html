@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asistente Normativo SSN 2024–2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 14px 20px;
+    border-bottom: 1px solid #21262d;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #0d1117;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    width: 32px; height: 32px;
+    background: #1f6feb;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+
+  header h1 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e6edf3;
+  }
+
+  header p {
+    font-size: 12px;
+    color: #8b949e;
+    margin-top: 1px;
+  }
+
+  /* API KEY BAR */
+  #key-bar {
+    padding: 10px 20px;
+    background: #161b22;
+    border-bottom: 1px solid #21262d;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  #key-bar label { font-size: 12px; color: #8b949e; white-space: nowrap; }
+
+  #api-input {
+    flex: 1;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #e6edf3;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+  }
+  #api-input:focus { border-color: #1f6feb; }
+  #api-input::placeholder { color: #484f58; }
+
+  #save-btn {
+    background: #1f6feb;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  #save-btn:hover { background: #388bfd; }
+
+  #key-msg { font-size: 12px; color: #3fb950; white-space: nowrap; }
+
+  /* ── CHAT ── */
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    scroll-behavior: smooth;
+  }
+
+  #chat::-webkit-scrollbar { width: 4px; }
+  #chat::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+
+  /* Welcome */
+  .welcome {
+    margin: auto;
+    text-align: center;
+    max-width: 480px;
+    padding: 20px;
+    animation: fadeup .4s ease;
+  }
+
+  .welcome .icon { font-size: 36px; margin-bottom: 12px; }
+
+  .welcome h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-bottom: 6px;
+  }
+
+  .welcome p {
+    font-size: 14px;
+    color: #8b949e;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .chip {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #8b949e;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .15s;
+    text-align: left;
+  }
+  .chip:hover {
+    border-color: #1f6feb;
+    color: #58a6ff;
+    background: #161b22;
+  }
+
+  /* Messages */
+  .msg {
+    display: flex;
+    gap: 12px;
+    max-width: 720px;
+    width: 100%;
+    animation: fadeup .25s ease;
+  }
+
+  .msg.user { margin-left: auto; flex-direction: row-reverse; }
+
+  @keyframes fadeup {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .av {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    margin-top: 2px;
+  }
+  .av.bot { background: #1f6feb; }
+  .av.user { background: #21262d; border: 1px solid #30363d; }
+
+  .bbl {
+    border-radius: 12px;
+    padding: 11px 15px;
+    font-size: 14px;
+    line-height: 1.65;
+    max-width: calc(100% - 44px);
+  }
+
+  .bbl.bot {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-top-left-radius: 4px;
+    color: #e6edf3;
+  }
+
+  .bbl.user {
+    background: #1f6feb;
+    border-top-right-radius: 4px;
+    color: #fff;
+  }
+
+  .bbl.bot strong { color: #58a6ff; }
+
+  .ext-tag {
+    display: inline-block;
+    background: rgba(210,153,34,.15);
+    border: 1px solid rgba(210,153,34,.35);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #d2993a;
+    letter-spacing: .03em;
+    margin-bottom: 7px;
+  }
+
+  /* Typing */
+  .dots { display: flex; gap: 4px; padding: 3px 0; align-items: center; }
+  .dots span {
+    width: 6px; height: 6px;
+    background: #484f58;
+    border-radius: 50%;
+    animation: dot 1.2s infinite;
+  }
+  .dots span:nth-child(2) { animation-delay: .2s; }
+  .dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes dot {
+    0%,60%,100% { transform: translateY(0); opacity:.4; }
+    30% { transform: translateY(-5px); opacity:1; }
+  }
+
+  /* ── INPUT ── */
+  #bottom {
+    padding: 14px 20px 18px;
+    border-top: 1px solid #21262d;
+    background: #0d1117;
+    flex-shrink: 0;
+  }
+
+  #input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  #msg-input {
+    flex: 1;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: #e6edf3;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+    line-height: 1.5;
+    transition: border-color .15s;
+    overflow-y: auto;
+  }
+  #msg-input:focus { border-color: #1f6feb; }
+  #msg-input::placeholder { color: #484f58; }
+
+  #send {
+    width: 44px; height: 44px;
+    background: #1f6feb;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  #send:hover { background: #388bfd; }
+  #send:disabled { background: #21262d; cursor: not-allowed; }
+  #send svg { width: 18px; height: 18px; fill: #fff; }
+
+  #hint {
+    text-align: center;
+    font-size: 11px;
+    color: #484f58;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚖️</div>
+  <div>
+    <h1>Asistente Normativo SSN 2024–2025</h1>
+    <p>Resoluciones de la Superintendencia de Seguros de la Nación · P.A.S.</p>
+  </div>
+</header>
+
+<div id="key-bar">
+  <label>API Key:</label>
+  <input type="password" id="api-input" placeholder="sk-ant-..." />
+  <button id="save-btn" onclick="saveKey()">Guardar</button>
+  <span id="key-msg"></span>
+</div>
+
+<div id="chat">
+  <div class="welcome" id="welcome">
+    <div class="icon">📋</div>
+    <h2>Preguntame lo que quieras del curso</h2>
+    <p>Estoy entrenado con el contenido del curso sobre las resoluciones de la S.S.N. dictadas en 2024–2025 y su impacto práctico en la actividad del Productor Asesor de Seguros.</p>
+    <div class="chips">
+      <button class="chip" onclick="ask(this)">¿Qué establece la Res. 24/2025 sobre capitales mínimos?</button>
+      <button class="chip" onclick="ask(this)">¿Qué datos del PAS deben figurar en la póliza?</button>
+      <button class="chip" onclick="ask(this)">¿Qué es el FFEP y qué cambió con la Res. 681/2025?</button>
+      <button class="chip" onclick="ask(this)">¿Qué son los Grandes Riesgos según la Res. 471/2025?</button>
+      <button class="chip" onclick="ask(this)">¿Qué sumas de RC automotor fijó la Res. 589/2025?</button>
+      <button class="chip" onclick="ask(this)">¿Qué resoluciones cubre el curso?</button>
+    </div>
+  </div>
+</div>
+
+<div id="bottom">
+  <div id="input-row">
+    <textarea id="msg-input" placeholder="Consultá sobre la normativa SSN 2024–2025…" rows="1"
+      onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+    <button id="send" onclick="send()" title="Enviar">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+  <div id="hint">Enter para enviar · Shift+Enter nueva línea</div>
+</div>
+
+<script>
+const COURSE_CONTENT = `
+CURSO: ACTUALIZACIÓN NORMATIVA S.S.N. 2024-2025 Y SU IMPACTO PRÁCTICO EN LA ACTIVIDAD DEL P.A.S.
+Organizado por el Ente Cooperador Ley 22.400 - Plataforma Virtual - Cursos E-Learning
+
+=== INTRODUCCIÓN ===
+Durante el año 2025, la Superintendencia de Seguros de la Nación (S.S.N.) dictó diversas resoluciones de aplicación en el Mercado Asegurador. El conocimiento de las mismas resulta de gran importancia para el Productor Asesor de Seguros (P.A.S.), ya que han marcado una preocupación esencial del Órgano de Control, referida a la simplificación de trámites para los operadores del Mercado Asegurador y la posibilidad de acceso a la información para mayor cantidad de interesados.
+
+Objetivo del curso: brindar información al P.A.S. que le permita un mejor conocimiento y poder cumplir así con la normativa vigente, evitando consecuencias como fallos judiciales que involucren solidariamente al PAS.
+
+Fallo relevante: La Sala Primera Civil y Comercial de Gualeguaychú hizo extensiva en forma solidaria al P.A.S. interviniente la condena dictada, por considerarlo el "vendedor" del servicio (artículo 40 de la Ley de Defensa del Consumidor) y no haber advertido a su cliente el estado en que se encontraba la aseguradora para quien comercializaba, que surgía de los indicadores publicados por la S.S.N.
+
+Deber del PAS (art. 10 inc. h Ley 22.400): "Asesorar al asegurado durante la vigencia del contrato acerca de sus derechos, cargas y obligaciones, en particular con relación a los siniestros".
+
+Nuevo Régimen de Información: La S.S.N. busca modernizar la gestión de datos con un nuevo sistema basado en microservicios, ampliando la supervisión a datos financieros, de solvencia y operativos, promoviendo un enfoque basado en riesgos.
+
+Tablero de Monitoreo (SIEP): Permite visualizar en tiempo real los datos enviados por las entidades de seguro al sistema. Las aseguradoras, los P.A.S. y el público en general, podrán acceder a la información que reportan y compararla con métricas del sector.
+
+=== RESOLUCIÓN 24/2025 - NUEVO RÉGIMEN DE CAPITAL ÚNICO ===
+Fecha: 21 de enero de 2025.
+Contenido: Modificó el régimen de capitales mínimos para las aseguradoras. El régimen de capitales mínimos representa la capacidad de hacer frente a los compromisos derivados de los desvíos que puedan presentarse, garantizando la continuidad y la estabilidad de las mismas.
+
+Del análisis realizado sobre los montos definidos en la normativa vigente, surgió la necesidad de adecuarlos para otorgar solidez y solvencia al sector asegurador. Se entendió procedente realizar una simplificación de requisitos, determinando un único capital mínimo necesario para operar en la totalidad de las ramas comprendidas en el Plan de Cuentas.
+
+Capital a Acreditar por Ramas: "Para operar en seguros debe acreditarse un capital único equivalente a SETECIENTOS CINCUENTA MIL (750.000) Unidades de Valor Adquisitivo (UVA)".
+
+Esquema escalonado:
+- Al 31 de diciembre de 2025: 375.000 UVA (50% del total).
+- Al 30 de junio de 2026: 750.000 UVA (total exigido).
+
+La SSN ratificó que para el balance al 31 de diciembre de 2025 se debe acreditar el 50% del capital único establecido, equivalente a 375.000 UVA.
+
+Unidad de Valor Adquisitivo (UVA): Valor establecido por el BCRA, utilizado para ajustar créditos hipotecarios y plazos fijos. Se actualiza diariamente según el CER (Coeficiente de Estabilización de Referencia) basado en la inflación. Ejemplo al 27/02/2026: el valor de la UVA es $1.798,21. Para obtener el valor exacto, se recomienda consultar la web del BCRA.
+
+Plazos presentación Estados Contables según RGAA:
+- Aseguradoras: vencimiento el 14 de febrero de 2026 (45 días corridos tras el cierre).
+- Reaseguradoras: plazo hasta el 1 de marzo de 2026 (60 días corridos posteriores al cierre).
+
+En enero de 2026, a través de la circular IF-2026-05991245-APN-GE#SSN, el organismo notificó a las entidades supervisadas las pautas críticas para el cierre del ejercicio al 31 de diciembre de 2025, como forma de ordenar la transición hacia los nuevos requerimientos de capital.
+
+=== RESOLUCIÓN 158/2025 - ACTUALIZACIÓN PUNTO 25 DEL RGAA / PÓLIZAS ===
+Fecha: publicada el 17 de Marzo de 2025.
+Contenido: Modificó las condiciones contractuales de las pólizas, eliminando los anexos del punto 25.2.1. inc. a) y del punto 25.2.6. del RGAA.
+
+Intención: buscar la simplificación normativa, con el objeto de garantizar mayor claridad y eficiencia en la formalización del contrato, a fin de lograr que el asegurado (consumidor) del seguro pueda comprender con mayor claridad el contenido de la póliza adquirida.
+
+La S.S.N señaló que "resulta crucial establecer un marco normativo claro y seguro, que brinde certeza tanto jurídica como operativa". El Ente de Control decidió suprimir las normas redundantes y reubicar aquellas disposiciones que no tienen una relación directa con el contenido esencial de la póliza de seguro.
+
+Contenido de la póliza: La aseguradora debe entregar al tomador una póliza conforme a los artículos 11 (segunda parte) y 158 de la Ley de Seguros N° 17.418, incluyendo únicamente las condiciones contractuales que contemplen los riesgos asumidos y destacando las exclusiones y advertencias.
+
+Condiciones Particulares y Certificado de Incorporación Individual: En las Condiciones Particulares, así como en el Certificado de Incorporación Individual (de entrega anual obligatoria por cada bien o persona asegurada en pólizas colectivas), se debe consignar: datos de la aseguradora, datos del tomador, datos del asegurado, canales de contacto.
+
+Información que debe consignarse:
+- Detalle de los riesgos cubiertos y sus capitales asegurados.
+- Plazos de espera, carencia y franquicias para cada cobertura.
+- Componentes del premio: prima pura, gastos de producción y de explotación, recargos e impuestos según las disposiciones aplicables de entes recaudadores.
+
+En los seguros de vida con componente de ahorro y seguros de retiro: debe discriminarse la prima de riesgo de los restantes componentes del premio.
+
+Dato esencial del PAS: En toda emisión de póliza o endoso que involucre la intervención de un productor asesor de seguros, deberá constar su nombre completo, número de matrícula e información de contacto.
+
+Entrega y conservación de documentación: Es exclusiva responsabilidad de las aseguradoras entregar o poner a disposición del tomador la póliza, endosos y demás documentación, en un plazo máximo de quince (15) días corridos desde celebrado el contrato, debiendo conservar las constancias que respalden la entrega de la documentación al asegurado, cualquiera sea el medio utilizado.
+
+=== RESOLUCIÓN 260/2025 - JUICIOS Y MEDIACIONES DEL MERCADO ASEGURADOR ===
+Fecha: 9 de Mayo de 2025, publicada en el Boletín Oficial el 12 del mismo mes.
+Contenido: Definió modificaciones en la modalidad de presentación de los datos referidos a juicios y mediaciones del mercado asegurador, mediante el reemplazo del punto 39.6.4 del RGAA (que tenía como texto base la Resolución SSN Nº 38.708 del año 2014).
+
+Fundamento: La S.S.N. destacó que tiene como función principal velar por la solvencia de las entidades aseguradoras y reaseguradoras, garantizando los intereses de asegurados y asegurables. Las reclamaciones judiciales y las mediaciones constituyen, en el mercado asegurador, un pasivo significativo dentro del rubro siniestros pendientes.
+
+Sistema Informativo de Juicios y Mediaciones (SIJyM): Se establece mediante el punto 39.6.4. del R.G.A.A. el Sistema Informativo del Estado de la Cartera de Juicios y Mediaciones, denominado SIJyM.
+
+Las aseguradoras deberán remitir información sobre juicios y mediaciones en forma trimestral. La fecha límite de presentación será de diez (10) días corridos posteriores al plazo previsto para la entrega de los estados contables.
+
+=== RESOLUCIÓN 286/2025 - ELIMINACIÓN DECLARACIONES JURADAS ARCA ===
+Fecha: 2 de Junio de 2025.
+Contenido: En concordancia con la Resolución General N° 696/2025 de la ARCA, eliminó el requisito que obligaba a los accionistas a presentar ante la SSN las declaraciones juradas de Impuestos a las Ganancias y sobre los Bienes Personales ya presentadas en ARCA.
+
+Mediante la Resolución General RESOG-2025-5696-E-AFIP-ARCA de fecha 22 de mayo, la ARCA instó a los sujetos del artículo 20 de la Ley N° 25.246 a abstenerse de requerir a sus clientes las declaraciones juradas de impuestos nacionales que presenten ante esa Agencia de Recaudación y Control Aduanero.
+
+La S.S.N. debe adecuar las normas en concordancia con las políticas de simplificación, desburocratización y en pos de maximizar la plena vigencia de las garantías constitucionales de los artículos 18 y 19 de la Constitución Nacional.
+
+=== RESOLUCIÓN 287/2025 - NUEVOS ESTÁNDARES DE RESERVAS TÉCNICAS ===
+Fecha: 2 de Junio de 2025.
+Contenido: Modificó el punto 33 del RGAA, con el objetivo de elevar los estándares técnicos para el cálculo de reservas y consolidar la solvencia del sector. Se dispuso su aplicación a partir de los Estados Contables con cierre al 30 de junio de 2025.
+
+Criterio mínimo: Se adopta el procedimiento del "promedio de importes acordados actualizados por mediaciones" para una mejor estimación de un compromiso futuro de un valor más representativo de una mediación para cálculo de sus reservas. Se recalculan los rangos de demandas actualizadas junto a sus respectivos pasivos mínimos.
+
+Siniestros Pendientes: Al cierre de cada ejercicio o período, las aseguradoras deben estimar los siniestros pendientes de pago, debiendo arbitrar todos los medios necesarios para que las carpetas de siniestros cuenten con todos los elementos indispensables para efectuar su correcta valuación.
+
+IBNR: La resolución dispone la reevaluación de las matrices en materia de reservas por Siniestros Ocurridos pero No Reportados (I.B.N.R.) junto a una libertad de metodología de valuación de los importes correspondientes a "siniestros excepcionales".
+
+Automotores: Se incorpora la posibilidad de calcular los porcentajes referidos a los pasivos mínimos de las tablas de Automotores, Motovehículos y Responsabilidad Civil en base a la experiencia siniestral. Se incorporan al cálculo de la Reserva Técnica por Insuficiencia de Primas las amortizaciones correspondientes.
+
+Índices FACPCE: Coeficientes mensuales utilizados para ajustar los estados contables por inflación (re expresión en moneda homogénea), basados en la Resolución 539/2018 y el IPC del INDEC. Permiten actualizar el valor de activos/pasivos no dinerarios.
+
+=== RESOLUCIÓN 293/2025 - SEGURO DE CAUCIÓN PARA OBRA/SUMINISTROS/SERVICIOS PÚBLICOS ===
+Fecha: publicada el 3 de junio en el Boletín Oficial.
+Contenido: Introdujo importantes cambios en la normativa referente al Seguro de Caución para Obra y/o Suministros y/o Servicios Públicos, con el objeto de reducir la carga burocrática y adaptarlo a las necesidades del mercado.
+
+Se buscó una mayor flexibilidad en el diseño y comercialización de las pólizas y brindar mayor claridad en el alcance de las coberturas. Se derogaron las resoluciones números 17.047 (9 de diciembre de 1982) y 20.943 (26 de septiembre de 1990).
+
+Con la nueva resolución se dio opción a cada entidad aseguradora de presentar sus propias condiciones o modificar los textos propuestos según las necesidades del mercado. La nueva cobertura se incorpora al "Anexo del punto 23.2." del RGAA.
+
+Condiciones Específicas del Seguro de Caución (Anexo I): Garantía de Mantenimiento de Oferta, Garantía de Ejecución de Contrato, Garantía de Anticipo Financiero en Contrato de Obra, Garantía de Anticipo en Contrato de Suministro y/o Servicio, Garantía de Anticipo para Acopio en Contrato de Obra, Garantía de Sustitución de Fondos de Reparo, Garantía de Obras Iniciales de Puesta en Valor, Garantía de Obras Obligatorias, Garantía de Obras de Rehabilitación, Garantía de Tenencia de Bienes para su Uso/Reparación/Manutención/Reacondicionamiento, Garantía de Tenencia de Material para Fabricación o Montaje, Garantía de Certificación de Avance de Fabricación en Taller, Garantía de Impugnación, Garantías para Concesiones - Cumplimiento de la Adjudicación.
+
+=== RESOLUCIÓN 384/2025 - MODIFICACIÓN RGAA / SISTEMA DE DEPÓSITO DE PLANES ===
+Fecha: 25 de Julio de 2025.
+Contenido: Estableció lineamientos específicos para las ramas de Caución, Crédito y Riesgos Agropecuarios y Forestales, incorporándolas al Sistema de Depósito de Planes, a fin de agilizar y modernizar los procesos de autorización.
+
+Sistema de Depósito de Planes: Es un mecanismo de desburocratización que permite a las aseguradoras autorizar automáticamente sus nuevos productos y tarifas mediante el "depósito" de los mismos, cumpliendo lineamientos técnicos básicos sin aprobación previa caso por caso.
+
+Punto 23 RGAA: Las aseguradoras sólo podrán operar en las ramas de seguro en las que cuenten con la autorización expresa por parte del Organismo de Control. Se deberá presentar el Acta del Órgano de Administración donde conste la voluntad societaria de operar en la rama en cuestión.
+
+Pólizas de Grandes Riesgos: Se redefinió el concepto (sumas aseguradas superiores a 3.500.000 UVA). Las aseguradoras deben informar estos contratos dentro de los quince días de su emisión, adjuntando certificaciones técnicas y legales. Se introdujeron disposiciones para microseguros y se actualizaron anexos normativos vinculados a seguros de vida, salud, retiro y riesgos patrimoniales.
+
+Al realizar el depósito del plan, la aseguradora deberá presentar nota firmada por el Presidente de la entidad, junto con: condiciones contractuales del plan y formularios; nota técnica; política de suscripción y retención de riesgos; opinión actuarial; opinión letrada.
+
+La SSN mantiene la supervisión. El trámite se realiza a través de la plataforma de Trámites a Distancia (TAD).
+
+=== RESOLUCIÓN 388/2025 - NUEVO RÉGIMEN INFORMATIVO DE INVERSIONES ===
+Fecha: 25 de Julio de 2025.
+Contenido: Modificó el punto 39.10.3.3. del RGAA, que regula el régimen informativo de aseguradoras y reaseguradoras.
+
+SINENSUP: Sistema de Información de Entidades Supervisadas, plataforma digital de la SSN utilizada para la carga, envío y control de balances trimestrales, inversiones y datos complementarios de las aseguradoras y reaseguradoras.
+
+Cambios: Se elimina la carga manual en el sistema SINENSUP para aseguradoras, adoptándose un modelo basado en microservicios que permite la carga directa desde los sistemas internos de cada entidad. Se aplica solo a las aseguradoras; las reaseguradoras continúan presentando su información de inversiones a través del SINENSUP. Los reportes semanales y mensuales de inversiones ahora se realizan a través del nuevo Régimen de Información (RI).
+
+=== RESOLUCIÓN 435/2025 - PUBLICIDAD, CARTELERÍA Y BOTÓN DE BAJA ===
+Fecha: 12 de Agosto de 2025.
+Contenido: Actualizó los Lineamientos para la Publicidad y Cartelería, regulando la información que las aseguradoras deben brindar en sus páginas web y aplicaciones móviles. Adapta al sector las disposiciones de Defensa del Consumidor que exigen un mecanismo claro para solicitar la baja de servicios contratados online.
+
+Los proveedores deben ofrecer un "botón de baja" visible, sin requerir trámites previos o registros adicionales. El Organismo de Control reglamenta cómo debe implementarse este elemento en pólizas contratadas a través de medios electrónicos.
+
+Obligaciones para las aseguradoras (excepto ART): Deben incluir en el pie de página de su web institucional: los datos del Servicio de Atención al Asegurado; nombre del responsable y suplente, teléfonos, correo electrónico o enlace a formulario de reclamo, y número de inscripción ante la SSN; canal para resolver reclamos no solucionados a través del portal oficial de la SSN.
+
+=== RESOLUCIÓN 464/2025 - SISTEMA INFORMATIVO DE EMISIÓN DE PÓLIZAS (SIEP) ===
+Fecha: 26 de Agosto de 2025.
+Contenido: Introdujo cambios sustanciales en el Sistema Informativo de Emisión de Pólizas (SIEP). Se buscó modernizar y digitalizar el mercado asegurador, ampliando la obligación de reporte a casi todas las ramas patrimoniales, con excepción (en esta etapa) de Riesgos del Trabajo y Riesgos Agropecuarios y Forestales.
+
+Hasta la resolución, el SIEP alcanzaba únicamente a Automotores, Caución, Crédito, Motovehículos y RC de Transporte Público de Pasajeros. Se incorporaron nuevas ramas: Incendio, Responsabilidad Civil, Transporte de Mercaderías, Aeronavegación, Robo y Riesgos Similares, Accidentes a Pasajeros, Transporte Cascos, Seguro Técnico y Otros Riesgos Patrimoniales, entre otras.
+
+El Manual Técnico del SIEP (versión 2.1) se puso a disposición en la web institucional de la S.S.N. La medida se enmarca dentro del proceso de modernización tecnológica.
+
+=== RESOLUCIÓN 471/2025 - GRANDES RIESGOS Y PLANES CON CONDICIONES GENERALES Y UNIFORMES ===
+Fecha: 3 de Septiembre de 2025.
+Contenido: Introdujo cambios en el RGAA en lo referido a la operatoria de Grandes Riesgos y a los planes con condiciones generales y uniformes.
+
+Grandes Riesgos: Se considerarán Grandes Riesgos aquellas pólizas cuya suma asegurada supere las 3.500.000 UVA, siempre que no correspondan a seguros de personas ni a planes sujetos a autorizaciones específicas del RGAA. Estas pólizas se podrán comercializar sin autorización previa. Deberá constar en las condiciones particulares que se emiten bajo esta modalidad.
+
+Las aseguradoras deberán informar a la SSN, en la misma fecha en que presentan sus estados contables trimestrales, un reporte detallado con todas las pólizas de Grandes Riesgos suscriptas en dicho período. Esta resolución dejó sin efecto la obligación de informar estos contratos dentro de los quince días de su emisión.
+
+=== RESOLUCIÓN 589/2025 - RESPONSABILIDAD CIVIL AUTOMOTOR Y DE TRANSPORTE PÚBLICO DE PASAJEROS ===
+Nuevas sumas fijadas:
+- Gastos sanatoriales por persona: $910.000.
+- Gastos de sepelio por persona: $533.000.
+- Seguro Obligatorio RC: $20.800.000.
+- RC voluntaria para autos, motos y similares: $208.000.000.
+- RC para taxis, remises, camiones y M1: $455.000.000.
+- RC para transporte M2 y M3: $676.000.000.
+- Transporte público: límite $676.000.000 (franquicia $3.380.000).
+- Descubierto obligatorio para taxis/remises: $494.000.
+- Vehículos intervinientes en servicio convenido por Plataforma Tecnológica: $455.000.000.
+
+El ajuste se basa en la variación de la Tasa FACPCE. Las nuevas sumas serán obligatorias para todas las pólizas emitidas o renovadas desde enero de 2026.
+
+Para solicitar la ampliación de los límites, las entidades aseguradoras deberán remitir: a) Nota firmada por el Presidente de la entidad. b) Política de Suscripción y Retención de Riesgos conforme el punto 24.1. del RGAA.
+
+=== RESOLUCIÓN 681/2025 - FONDO FIDUCIARIO DE ENFERMEDADES PROFESIONALES (FFEP) ===
+Fecha: 11 de Diciembre de 2025.
+Contenido: Introdujo cambios significativos en el esquema de administración y contabilidad del Fondo Fiduciario de Enfermedades Profesionales (FFEP).
+
+FFEP: Vehículo financiero del sistema de Riesgos del Trabajo en Argentina destinado a financiar la cobertura de enfermedades que no están incluidas en el listado cerrado de la Ley 24.557, pero que son reconocidas como tales por las Comisiones Médicas o la justicia.
+
+Historia del FFEP: Creado en 1997 para garantizar la cobertura de enfermedades profesionales de alto impacto económico. En el año 2000 fue formalmente denominado FFEP y se aprobó un primer reglamento operativo. El fondo tuvo un papel destacado para financiar prestaciones médicas vinculadas al COVID-19. Se dictaron normativas de excepción y se ordenó la suspensión del giro de fondos a la cuenta fiduciaria común.
+
+Características principales del FFEP:
+- Financiación a través de una suma fija mensual que los empleadores pagan por cada trabajador, adicional a la alícuota de la ART.
+- El valor es fijado por disposición de la SRT y se ajusta mensualmente según la variación del índice RIPTE.
+- Es gestionado por las propias ART, bajo la supervisión de la SSN y la SRT.
+
+La nueva resolución sustituyó el "Reglamento para la contabilización, ingresos y egresos de fondos e inversiones del Fondo Fiduciario de Enfermedades Profesionales" previsto en el artículo 1° de la Resolución 358/2020. Resulta necesario reordenar el esquema, restablecer el giro de fondos cuando corresponda y actualizar los procedimientos de recomposición, compensación y control.
+`;
+
+const SYSTEM = `Sos un asistente especializado en el curso "Actualización Normativa S.S.N. 2024-2025 y su impacto práctico en la actividad del P.A.S." (Productor Asesor de Seguros, Argentina).
+
+CONTENIDO DEL CURSO:
+${COURSE_CONTENT}
+
+INSTRUCCIONES:
+1. Respondé PRINCIPALMENTE basándote en el contenido del curso transcripto arriba.
+2. Este chatbot está destinado exclusivamente a responder preguntas sobre seguros, normativa SSN, actividad del PAS y temas relacionados con el curso. Si te hacen una pregunta completamente ajena a estos temas (por ejemplo, precios de productos, recetas de cocina, noticias, etc.), respondé amablemente que solo podés ayudar con consultas sobre la normativa SSN 2024-2025 y la actividad del PAS.
+3. Si la pregunta está relacionada con seguros o normativa pero requiere información NO contenida en el curso, indicalo CLARAMENTE al inicio con: "INFORMACIÓN NO CONTENIDA EN EL CURSO:" seguido de la información que puedas proporcionar.
+4. Usá un tono profesional, claro y conciso.
+5. Cuando cites datos importantes (fechas, montos, plazos), resaltálos.
+6. Respondé en español rioplatense, siendo preciso y útil para el PAS argentino.`;
+
+let key = '';
+let msgs = [];
+let busy = false;
+
+function saveKey() {
+  const v = document.getElementById('api-input').value.trim();
+  if (!v.startsWith('sk-')) {
+    document.getElementById('key-msg').textContent = '⚠ Formato inválido';
+    document.getElementById('key-msg').style.color = '#f85149';
+    return;
+  }
+  key = v;
+  document.getElementById('api-input').value = '';
+  document.getElementById('key-msg').textContent = '✓ Guardada';
+  document.getElementById('key-msg').style.color = '#3fb950';
+  setTimeout(() => { document.getElementById('key-bar').style.display = 'none'; }, 1000);
+}
+
+function resize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function onKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+
+function ask(btn) {
+  document.getElementById('msg-input').value = btn.textContent;
+  send();
+}
+
+function addMsg(role, text) {
+  const w = document.getElementById('welcome');
+  if (w) w.remove();
+
+  const chat = document.getElementById('chat');
+  const row = document.createElement('div');
+  row.className = `msg ${role}`;
+
+  const av = document.createElement('div');
+  av.className = `av ${role}`;
+  av.textContent = role === 'bot' ? '⚖️' : '🧑';
+
+  const bbl = document.createElement('div');
+  bbl.className = `bbl ${role}`;
+
+  if (role === 'bot') {
+    if (text.includes('INFORMACIÓN NO CONTENIDA EN EL CURSO:')) {
+      const parts = text.split('INFORMACIÓN NO CONTENIDA EN EL CURSO:');
+      let html = parts[0].trim() ? fmt(parts[0].trim()) + '<br><br>' : '';
+      html += '<span class="ext-tag">⚠ INFORMACIÓN NO CONTENIDA EN EL CURSO</span><br>';
+      html += fmt(parts[1].trim());
+      bbl.innerHTML = html;
+    } else {
+      bbl.innerHTML = fmt(text);
+    }
+  } else {
+    bbl.textContent = text;
+  }
+
+  row.appendChild(av);
+  row.appendChild(bbl);
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function fmt(t) {
+  return t
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^- (.*$)/gm, '• $1')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function addTyping() {
+  const chat = document.getElementById('chat');
+  const row = document.createElement('div');
+  row.className = 'msg bot'; row.id = 'typing';
+  const av = document.createElement('div');
+  av.className = 'av bot'; av.textContent = '⚖️';
+  const bbl = document.createElement('div');
+  bbl.className = 'bbl bot';
+  bbl.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
+  row.appendChild(av); row.appendChild(bbl);
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing');
+  if (el) el.remove();
+}
+
+async function send() {
+  if (busy) return;
+  const inp = document.getElementById('msg-input');
+  const text = inp.value.trim();
+  if (!text) return;
+
+  if (!key) {
+    document.getElementById('key-msg').textContent = '⚠ Ingresá tu API Key';
+    document.getElementById('key-msg').style.color = '#f85149';
+    document.getElementById('key-bar').style.display = 'flex';
+    return;
+  }
+
+  addMsg('user', text);
+  msgs.push({ role: 'user', content: text });
+  inp.value = ''; inp.style.height = 'auto';
+  busy = true;
+  document.getElementById('send').disabled = true;
+  addTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1500,
+        system: SYSTEM,
+        messages: msgs
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || `Error ${res.status}`);
+
+    const reply = data.content[0]?.text || 'Sin respuesta.';
+    removeTyping();
+    addMsg('bot', reply);
+    msgs.push({ role: 'assistant', content: reply });
+
+  } catch (err) {
+    removeTyping();
+    let m = 'Error al conectar con la API.';
+    if (err.message.includes('401')) m = 'API Key inválida.';
+    else if (err.message.includes('429')) m = 'Límite de solicitudes. Intentá en unos segundos.';
+    else if (err.message.includes('fetch')) m = 'Sin conexión. Verificá tu red.';
+    addMsg('bot', `⚠ ${m}`);
+  } finally {
+    busy = false;
+    document.getElementById('send').disabled = false;
+  }
+}
+</script>
+</body>
+</html>
